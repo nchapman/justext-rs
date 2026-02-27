@@ -6,11 +6,18 @@ use scraper::Html;
 const REMOVE_TAGS: &[&str] = &[
     // scripts, style, head (Python kill_tags); noscript contains raw text in HTML5 parsing
     "script", "style", "head", "noscript",
-    // forms=True
-    "form", "input", "button", "select", "textarea",
+    // forms=True: form controls are dropped entirely
+    "input", "button", "select", "textarea",
     // embedded=True (embed, object, applet, iframe, layer, param)
     "embed", "object", "applet", "iframe", "layer", "param",
 ];
+
+/// Tags whose element is dropped but whose children are preserved.
+///
+/// Python's lxml Cleaner(forms=True) removes the <form> wrapper but keeps
+/// child content (paragraphs, divs, text) floating up to the parent level.
+/// Form controls (input, button, select, textarea) are dropped entirely above.
+const REMOVE_TAG_KEEP_CHILDREN: &[&str] = &["form"];
 
 /// Remove unwanted tags from HTML and return a cleaned document.
 ///
@@ -51,6 +58,13 @@ fn serialize_node(node: &ego_tree::NodeRef<scraper::node::Node>, out: &mut Strin
             let tag = el.name();
             if REMOVE_TAGS.contains(&tag) {
                 return; // skip element and all its children
+            }
+            if REMOVE_TAG_KEEP_CHILDREN.contains(&tag) {
+                // Drop the element tag but recurse into children (content floats up).
+                for child in node.children() {
+                    serialize_node(&child, out);
+                }
+                return;
             }
 
             out.push('<');
@@ -174,10 +188,23 @@ mod tests {
     fn test_remove_form_family() {
         let html = "<html><body><form><input type=\"text\" /><button>Go</button></form><p>text</p></body></html>";
         let doc = preprocess(html);
+        // Form tag is removed (children kept), controls are dropped entirely
         assert!(!has_tag(&doc, "form"));
         assert!(!has_tag(&doc, "input"));
         assert!(!has_tag(&doc, "button"));
         assert!(has_tag(&doc, "p"));
+    }
+
+    #[test]
+    fn test_form_wrapper_text_preserved() {
+        // Python lxml Cleaner(forms=True) removes the <form> wrapper but keeps
+        // child content (article paragraphs, divs, etc.) floating up to parent.
+        let html = "<html><body><form id=\"main\"><p>Article content</p></form></body></html>";
+        let doc = preprocess(html);
+        assert!(!has_tag(&doc, "form"), "form tag should be removed");
+        assert!(has_tag(&doc, "p"), "child <p> should survive");
+        let content = text_content(&doc);
+        assert!(content.contains("Article content"), "text inside form should be preserved");
     }
 
     #[test]
