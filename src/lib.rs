@@ -66,6 +66,37 @@ impl Default for Config {
     }
 }
 
+impl Config {
+    pub fn with_length_low(mut self, n: usize) -> Self {
+        self.length_low = n;
+        self
+    }
+    pub fn with_length_high(mut self, n: usize) -> Self {
+        self.length_high = n;
+        self
+    }
+    pub fn with_stopwords_low(mut self, v: f64) -> Self {
+        self.stopwords_low = v;
+        self
+    }
+    pub fn with_stopwords_high(mut self, v: f64) -> Self {
+        self.stopwords_high = v;
+        self
+    }
+    pub fn with_max_link_density(mut self, v: f64) -> Self {
+        self.max_link_density = v;
+        self
+    }
+    pub fn with_max_heading_distance(mut self, n: usize) -> Self {
+        self.max_heading_distance = n;
+        self
+    }
+    pub fn with_no_headings(mut self, v: bool) -> Self {
+        self.no_headings = v;
+        self
+    }
+}
+
 /// Classify paragraphs in HTML as content or boilerplate.
 pub fn justext(html: &str, stoplist: &HashSet<String>, config: &Config) -> Vec<Paragraph> {
     let doc = preprocess::preprocess(html);
