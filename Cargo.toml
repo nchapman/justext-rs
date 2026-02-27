@@ -1,0 +1,39 @@
+[package]
+name = "justext"
+version = "0.1.0"
+edition = "2021"
+description = "Rust port of JusText — paragraph-level boilerplate removal for HTML"
+license = "Apache-2.0"
+rust-version = "1.80"
+readme = "README.md"
+keywords = ["justext", "boilerplate", "html", "extraction", "text"]
+categories = ["parser-implementations", "text-processing", "web-programming"]
+
+[lib]
+name = "justext"
+
+[dependencies]
+# HTML parsing + CSS selectors (html5ever-based, spec-compliant)
+scraper = "0.22"
+ego-tree = "0.10"
+
+# Heading detection (\bh\d\b pattern in dom_path)
+regex = "1"
+
+# Error types
+thiserror = "2"
+
+# Logging (optional — zero-cost when disabled)
+tracing = { version = "0.1", optional = true }
+
+[features]
+default = []
+tracing = ["dep:tracing"]
+
+[dev-dependencies]
+pretty_assertions = "1"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "extraction"
+harness = false
