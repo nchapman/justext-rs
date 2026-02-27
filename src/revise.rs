@@ -24,7 +24,7 @@ pub fn revise_paragraph_classification(paragraphs: &mut [Paragraph], max_heading
                 paragraphs[i].class_type = ClassType::NearGood;
                 break;
             }
-            distance += paragraphs[j].text.len();
+            distance += paragraphs[j].text.chars().count();
             j += 1;
         }
     }
@@ -87,7 +87,7 @@ pub fn revise_paragraph_classification(paragraphs: &mut [Paragraph], max_heading
                 paragraphs[i].class_type = ClassType::Good;
                 break;
             }
-            distance += paragraphs[j].text.len();
+            distance += paragraphs[j].text.chars().count();
             j += 1;
         }
     }

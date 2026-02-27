@@ -4,8 +4,12 @@ use scraper::Html;
 
 /// Tags to completely remove (including all children).
 const REMOVE_TAGS: &[&str] = &[
-    "script", "style", "head", "form", "input", "button", "select", "textarea", "embed", "object",
-    "applet",
+    // scripts, style, head (Python kill_tags)
+    "script", "style", "head",
+    // forms=True
+    "form", "input", "button", "select", "textarea",
+    // embedded=True (embed, object, applet, layer, param)
+    "embed", "object", "applet", "layer", "param",
 ];
 
 /// Remove unwanted tags from HTML and return a cleaned document.
@@ -73,7 +77,9 @@ fn serialize_node(node: &ego_tree::NodeRef<scraper::node::Node>, out: &mut Strin
         Node::Text(text) => {
             out.push_str(&text.text);
         }
-        // Skip comments and processing instructions
+        // Skip comments and doctypes.
+        // Note: Python's Cleaner has processing_instructions=False (preserves PIs), but PIs
+        // are vanishingly rare in real-world HTML so we strip them here for simplicity.
         Node::Comment(_) | Node::ProcessingInstruction(_) | Node::Doctype(_) => {}
         Node::Fragment => {
             for child in node.children() {
@@ -176,6 +182,24 @@ mod tests {
             .any(|n| matches!(n.value(), scraper::node::Node::Comment(_)));
         assert!(!has_comment);
         assert!(has_tag(&doc, "p"));
+    }
+
+    #[test]
+    fn test_remove_embedded_layer() {
+        // <layer> is a legacy Netscape tag removed by Python's embedded=True
+        let html = "<html><body><layer>plugin</layer><p>text</p></body></html>";
+        let doc = preprocess(html);
+        assert!(!has_tag(&doc, "layer"));
+        assert!(has_tag(&doc, "p"));
+    }
+
+    #[test]
+    fn test_remove_embedded_param() {
+        // <param> is removed by Python's embedded=True
+        let html = "<html><body><object><param name=\"src\" value=\"x\" /></object><p>text</p></body></html>";
+        let doc = preprocess(html);
+        assert!(!has_tag(&doc, "param"));
+        assert!(!has_tag(&doc, "object"));
     }
 
     #[test]
