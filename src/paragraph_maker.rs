@@ -531,4 +531,81 @@ mod tests {
         assert_eq!(p.dom(), "html");
         assert_eq!(p.xpath(), "/html[1]");
     }
+
+    // --- Port of test_utils.py TestStringUtils ---
+
+    #[test]
+    fn test_is_blank_empty() {
+        assert!(is_blank(""));
+    }
+
+    #[test]
+    fn test_is_blank_space() {
+        assert!(is_blank(" "));
+    }
+
+    #[test]
+    fn test_is_blank_nobreak_space() {
+        assert!(is_blank("\u{00A0}\t "));
+    }
+
+    #[test]
+    fn test_is_blank_narrow_nobreak_space() {
+        assert!(is_blank("\u{202F} \t"));
+    }
+
+    #[test]
+    fn test_is_blank_spaces() {
+        assert!(is_blank("    "));
+    }
+
+    #[test]
+    fn test_is_blank_newline() {
+        assert!(is_blank("\n"));
+    }
+
+    #[test]
+    fn test_is_blank_tab() {
+        assert!(is_blank("\t"));
+    }
+
+    #[test]
+    fn test_is_blank_mixed_whitespace() {
+        assert!(is_blank("\t\n "));
+    }
+
+    #[test]
+    fn test_is_blank_with_chars() {
+        assert!(!is_blank("  #  "));
+    }
+
+    #[test]
+    fn test_normalize_no_change() {
+        let s = "a b c d e f g h i j k l m n o p q r s ...";
+        assert_eq!(normalize_whitespace(s), s);
+    }
+
+    #[test]
+    fn test_normalize_dont_trim() {
+        // Leading/trailing whitespace collapses to a single space — not stripped.
+        let input = "  a b c d e f g h i j k l m n o p q r s ...  ";
+        let expected = " a b c d e f g h i j k l m n o p q r s ... ";
+        assert_eq!(normalize_whitespace(input), expected);
+    }
+
+    #[test]
+    fn test_normalize_newline_and_tab() {
+        // Whitespace runs containing \n collapse to \n; trailing \t\n → \n.
+        let input = "123 \n456\t\n";
+        let expected = "123\n456\n";
+        assert_eq!(normalize_whitespace(input), expected);
+    }
+
+    #[test]
+    fn test_normalize_non_break_spaces() {
+        // \u{00A0}\t and \u{202F} \t are whitespace runs without \n → collapse to space.
+        let input = "\u{00A0}\t €\u{202F} \t";
+        let expected = " € ";
+        assert_eq!(normalize_whitespace(input), expected);
+    }
 }
