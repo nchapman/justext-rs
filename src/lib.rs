@@ -8,7 +8,7 @@
 //!
 //! # Quick start
 //!
-//! ```rust,no_run
+//! ```rust
 //! use justext::{justext, get_stoplist, Config};
 //!
 //! let html = "<html><body><p>This is the main content.</p></body></html>";
@@ -23,8 +23,12 @@
 //! }
 //! ```
 
+mod classify;
 mod error;
 mod paragraph;
+mod paragraph_maker;
+mod preprocess;
+mod revise;
 pub mod stoplists;
 
 pub use error::JustextError;
@@ -63,8 +67,12 @@ impl Default for Config {
 }
 
 /// Classify paragraphs in HTML as content or boilerplate.
-pub fn justext(_html: &str, _stoplist: &HashSet<String>, _config: &Config) -> Vec<Paragraph> {
-    todo!("Phase 3-6: preprocess → make_paragraphs → classify → revise")
+pub fn justext(html: &str, stoplist: &HashSet<String>, config: &Config) -> Vec<Paragraph> {
+    let doc = preprocess::preprocess(html);
+    let mut paragraphs = paragraph_maker::make_paragraphs(&doc);
+    classify::classify_paragraphs(&mut paragraphs, stoplist, config);
+    revise::revise_paragraph_classification(&mut paragraphs, config.max_heading_distance);
+    paragraphs
 }
 
 /// Convenience: extract only the good paragraph text.
