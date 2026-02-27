@@ -21,7 +21,7 @@ const PARAGRAPH_TAGS: &[&str] = &[
     "dl",
     "dt",
     "fieldset",
-    "form",
+    "form", // kept to mirror Python's list; <form> is stripped in preprocess so the walker never sees it
     "legend",
     "optgroup",
     "option",
@@ -471,6 +471,14 @@ mod tests {
         let ps = parse("abc<br/>def becoming abcdef");
         assert_eq!(ps.len(), 1);
         assert_eq!(ps[0].text, "abc def becoming abcdef");
+    }
+
+    #[test]
+    fn test_br_br_only_emits_no_paragraphs() {
+        // Double <br> with no surrounding text must not flush an empty paragraph.
+        // Regression test for contains_text() requiring non-whitespace content.
+        let ps = parse("<html><body><br/><br/></body></html>");
+        assert_eq!(ps.len(), 0, "<br><br> alone must not produce any paragraph");
     }
 
     // --- Port of test_paths.py ---

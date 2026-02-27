@@ -73,7 +73,7 @@ fn serialize_node(node: &ego_tree::NodeRef<scraper::node::Node>, out: &mut Strin
                 out.push(' ');
                 out.push_str(attr);
                 out.push_str("=\"");
-                out.push_str(&val.replace('"', "&quot;"));
+                escape_attr(val, out);
                 out.push('"');
             }
             if is_void_element(tag) {
@@ -112,7 +112,28 @@ fn serialize_node(node: &ego_tree::NodeRef<scraper::node::Node>, out: &mut Strin
     }
 }
 
+/// Write an HTML-escaped attribute value into `out`.
+///
+/// Escapes `&`, `<`, `>`, and `"` so that the serialized attribute string is valid HTML
+/// and round-trips correctly through the second parse. Bare `&` is common in URL query
+/// strings (e.g. `href="/?a=1&b=2"`) and must be re-encoded as `&amp;`.
+fn escape_attr(val: &str, out: &mut String) {
+    for ch in val.chars() {
+        match ch {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '"' => out.push_str("&quot;"),
+            _ => out.push(ch),
+        }
+    }
+}
+
 /// HTML void elements that must not have a closing tag.
+///
+/// Note: `embed` and `param` also appear in `REMOVE_TAGS` and will be skipped
+/// before this function is ever reached — they are listed here for completeness
+/// against the HTML5 spec void-element list.
 fn is_void_element(tag: &str) -> bool {
     matches!(
         tag,
@@ -247,6 +268,17 @@ mod tests {
         let content = text_content(&doc);
         assert!(content.contains("Hello"));
         assert!(content.contains("world"));
+    }
+
+    #[test]
+    fn test_attribute_ampersand_survives_double_parse() {
+        // Bare & in URL query strings must be re-encoded as &amp; in the serialized
+        // intermediate so it round-trips correctly through the second parse.
+        let html = r#"<html><body><a href="/?a=1&amp;b=2">link</a></body></html>"#;
+        let doc = preprocess(html);
+        let sel = scraper::Selector::parse("a").unwrap();
+        let href = doc.select(&sel).next().unwrap().value().attr("href").unwrap();
+        assert_eq!(href, "/?a=1&b=2", "decoded & must survive the double parse");
     }
 
     #[test]
