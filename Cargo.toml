@@ -6,6 +6,8 @@ description = "Rust port of JusText — paragraph-level boilerplate removal for 
 license = "Apache-2.0"
 rust-version = "1.80"
 readme = "README.md"
+repository = "https://github.com/lessisbetter/justext-rs"
+documentation = "https://docs.rs/justext"
 keywords = ["justext", "boilerplate", "html", "extraction", "text"]
 categories = ["parser-implementations", "text-processing", "web-programming"]
 
