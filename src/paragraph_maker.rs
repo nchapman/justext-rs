@@ -86,21 +86,13 @@ impl PathInfo {
 
     /// Push a new element onto the path.
     pub fn push(&mut self, tag: &str) {
-        // Get children counts from current top element (or use a fresh map if empty).
-        let order = {
-            let children = self
-                .elements
-                .last_mut()
-                .map(|(_, _, c)| c as *mut HashMap<String, usize>);
-            if let Some(children_ptr) = children {
-                // SAFETY: we hold &mut self, no aliasing
-                let children = unsafe { &mut *children_ptr };
-                let count = children.entry(tag.to_string()).or_insert(0);
-                *count += 1;
-                *count
-            } else {
-                1
-            }
+        // Extract ordinal before pushing (drops borrow on elements before the push).
+        let order = if let Some((_, _, children)) = self.elements.last_mut() {
+            let count = children.entry(tag.to_string()).or_insert(0);
+            *count += 1;
+            *count
+        } else {
+            1
         };
         self.elements.push((tag.to_string(), order, HashMap::new()));
     }
@@ -276,7 +268,8 @@ impl Walker {
                 }
                 let normalized = self.current.append_text(content);
                 if self.link {
-                    self.current.chars_count_in_links += normalized.len();
+                    // Count Unicode codepoints, not bytes — matches Python's len() on str.
+                    self.current.chars_count_in_links += normalized.chars().count();
                 }
                 self.br = false;
             }

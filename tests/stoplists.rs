@@ -41,7 +41,7 @@ fn test_get_stoplist_slovak() {
 
 #[test]
 fn test_get_stoplist_missing() {
-    assert!(get_stoplist("Klingon").is_none());
+    assert!(get_stoplist("Klingon").is_err());
 }
 
 #[test]

@@ -134,13 +134,14 @@ fn parse_stoplist(contents: &str) -> HashSet<String> {
 
 /// Return the stoplist for a given language (case-insensitive match).
 ///
-/// Returns `None` if the language is not recognized.
-pub fn get_stoplist(language: &str) -> Option<HashSet<String>> {
+/// Returns `Err(JustextError::UnknownLanguage)` if the language is not recognized.
+pub fn get_stoplist(language: &str) -> Result<HashSet<String>, crate::error::JustextError> {
     let language_lower = language.to_lowercase();
     STOPLISTS
         .iter()
         .find(|(name, _)| name.to_lowercase() == language_lower)
         .map(|(_, contents)| parse_stoplist(contents))
+        .ok_or_else(|| crate::error::JustextError::UnknownLanguage(language.to_string()))
 }
 
 /// Return the merged set of all stopwords from every language.

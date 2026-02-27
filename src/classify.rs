@@ -8,6 +8,7 @@ use crate::Config;
 /// Context-free classification of paragraphs.
 ///
 /// Sets `cf_class` on each paragraph. Decision tree matches Python exactly.
+#[allow(clippy::if_same_then_else)]
 pub fn classify_paragraphs(
     paragraphs: &mut [Paragraph],
     stoplist: &HashSet<String>,
@@ -16,15 +17,18 @@ pub fn classify_paragraphs(
     for paragraph in paragraphs.iter_mut() {
         paragraph.heading = !config.no_headings && paragraph.is_heading();
 
-        let length = paragraph.text.len();
+        // Python uses len(paragraph) which is len(paragraph.text) — character count, not bytes.
+        let length = paragraph.text.chars().count();
         let link_density = paragraph.links_density();
         let stopword_density = paragraph.stopwords_density(stoplist);
 
-        paragraph.cf_class = if link_density > config.max_link_density
-            || paragraph.text.contains('\u{00A9}')
-            || paragraph.text.contains("&copy")
-            || paragraph.dom_path.contains("select")
-        {
+        // Decision tree mirrors Python classify_paragraphs() exactly — order matters.
+        // Three initial branches all return Bad but for distinct semantic reasons.
+        paragraph.cf_class = if link_density > config.max_link_density {
+            ClassType::Bad
+        } else if paragraph.text.contains('\u{00A9}') || paragraph.text.contains("&copy") {
+            ClassType::Bad
+        } else if paragraph.dom_path.contains("select") {
             ClassType::Bad
         } else if length < config.length_low {
             if paragraph.chars_count_in_links > 0 {

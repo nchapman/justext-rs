@@ -17,9 +17,6 @@ name = "justext"
 scraper = "0.22"
 ego-tree = "0.10"
 
-# Heading detection (\bh\d\b pattern in dom_path)
-regex = "1"
-
 # Error types
 thiserror = "2"
 

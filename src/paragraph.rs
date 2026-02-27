@@ -1,10 +1,4 @@
 use std::collections::HashSet;
-use std::sync::LazyLock;
-
-use regex::Regex;
-
-/// Regex matching heading tags in a dom_path (h0-h9).
-static HEADING_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\bh\d\b").unwrap());
 
 /// Classification label for a paragraph.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -68,17 +62,26 @@ impl Paragraph {
     }
 
     /// Returns `true` if the dom_path contains a heading tag (h0-h9).
+    ///
+    /// dom_path is dot-separated ASCII tags (e.g. "html.body.div.h1").
+    /// A segment matches if it is exactly two bytes: `h` followed by an ASCII digit.
+    /// This mirrors Python's `\bh\d\b` regex where dots act as word boundaries.
     pub fn is_heading(&self) -> bool {
-        HEADING_RE.is_match(&self.dom_path)
+        self.dom_path.split('.').any(|seg| {
+            let b = seg.as_bytes();
+            b.len() == 2 && b[0] == b'h' && b[1].is_ascii_digit()
+        })
     }
 
-    /// Link density: chars_count_in_links / text.len(). Returns 0.0 if text is empty.
+    /// Link density: chars_count_in_links / text char count. Returns 0.0 if text is empty.
+    ///
+    /// Uses Unicode codepoint count (not byte length) to match Python's `len()` semantics.
     pub fn links_density(&self) -> f64 {
-        let len = self.text.len();
-        if len == 0 {
+        let char_count = self.text.chars().count();
+        if char_count == 0 {
             0.0
         } else {
-            self.chars_count_in_links as f64 / len as f64
+            self.chars_count_in_links as f64 / char_count as f64
         }
     }
 
