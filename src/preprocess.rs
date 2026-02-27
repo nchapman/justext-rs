@@ -4,12 +4,12 @@ use scraper::Html;
 
 /// Tags to completely remove (including all children).
 const REMOVE_TAGS: &[&str] = &[
-    // scripts, style, head (Python kill_tags)
-    "script", "style", "head",
+    // scripts, style, head (Python kill_tags); noscript contains raw text in HTML5 parsing
+    "script", "style", "head", "noscript",
     // forms=True
     "form", "input", "button", "select", "textarea",
-    // embedded=True (embed, object, applet, layer, param)
-    "embed", "object", "applet", "layer", "param",
+    // embedded=True (embed, object, applet, iframe, layer, param)
+    "embed", "object", "applet", "iframe", "layer", "param",
 ];
 
 /// Remove unwanted tags from HTML and return a cleaned document.
@@ -75,7 +75,16 @@ fn serialize_node(node: &ego_tree::NodeRef<scraper::node::Node>, out: &mut Strin
             }
         }
         Node::Text(text) => {
-            out.push_str(&text.text);
+            // HTML-escape so that decoded entities (e.g. &lt;year&gt; decoded to <year>
+            // by the first parse) are not re-interpreted as markup in the second parse.
+            for ch in text.text.chars() {
+                match ch {
+                    '&' => out.push_str("&amp;"),
+                    '<' => out.push_str("&lt;"),
+                    '>' => out.push_str("&gt;"),
+                    _ => out.push(ch),
+                }
+            }
         }
         // Skip comments and doctypes.
         // Note: Python's Cleaner has processing_instructions=False (preserves PIs), but PIs
@@ -212,4 +221,22 @@ mod tests {
         assert!(content.contains("Hello"));
         assert!(content.contains("world"));
     }
+
+    #[test]
+    fn test_text_entities_not_reparsed_as_tags() {
+        // &lt;year&gt; must survive as literal text, not become a real <year> element
+        // after the double-parse in remove_tags_and_comments().
+        let html = "<html><body><p>Use &lt;year&gt; as placeholder</p></body></html>";
+        let doc = preprocess(html);
+        let content = text_content(&doc);
+        assert!(
+            content.contains("<year>"),
+            "decoded entity text should be preserved as text"
+        );
+        assert!(
+            !has_tag(&doc, "year"),
+            "<year> must not become a DOM element"
+        );
+    }
+
 }
