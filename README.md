@@ -159,12 +159,19 @@ Full pipeline (HTML parse + classify + revise) with English stoplist:
 | medium (20 paragraphs) | 5 KB | 98 µs |
 | large (100 paragraphs) | 34 KB | 604 µs |
 
+### Comparison with Python jusText
+
+On a 925-file dataset (the [trafilatura comparison corpus](https://github.com/adbar/trafilatura)),
+Rust and Python produce identical extracted text on **99.4%** of files (919/925).
+
 Measured on Apple M4 Max, Rust 1.93, macOS 15.7.
 
 Reproduce:
 
 ```sh
-cargo bench
+cargo bench                                        # speed benchmarks
+cargo run --bin compare -- <html-dir>              # Rust output (JSONL)
+python3 scripts/compare_python.py --html-dir ...   # Python output (JSONL)
 ```
 
 ## License
