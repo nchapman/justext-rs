@@ -149,6 +149,24 @@ justext = { version = "0.1", features = ["tracing"] }
 The two are complementary. [trafilatura](https://github.com/adbar/trafilatura) uses readability
 first and falls back to JusText — this crate enables the same pattern in Rust.
 
+## Benchmarks
+
+Full pipeline (HTML parse + classify + revise) with English stoplist:
+
+| Input | Size | Time |
+|-------|-----:|-----:|
+| small (2 paragraphs) | 733 B | 21 µs |
+| medium (20 paragraphs) | 5 KB | 98 µs |
+| large (100 paragraphs) | 34 KB | 604 µs |
+
+Measured on Apple M4 Max, Rust 1.93, macOS 15.7.
+
+Reproduce:
+
+```sh
+cargo bench
+```
+
 ## License
 
 BSD-2-Clause
