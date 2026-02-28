@@ -7,7 +7,7 @@ use crate::Config;
 
 /// Context-free classification of paragraphs.
 ///
-/// Sets `cf_class` on each paragraph. Decision tree matches Python exactly.
+/// Sets `initial_class` on each paragraph. Decision tree matches Python exactly.
 #[allow(clippy::if_same_then_else)]
 pub fn classify_paragraphs(
     paragraphs: &mut [Paragraph],
@@ -24,7 +24,7 @@ pub fn classify_paragraphs(
 
         // Decision tree mirrors Python classify_paragraphs() exactly — order matters.
         // Three initial branches all return Bad but for distinct semantic reasons.
-        paragraph.cf_class = if link_density > config.max_link_density {
+        paragraph.initial_class = if link_density > config.max_link_density {
             ClassType::Bad
         } else if paragraph.text.contains('\u{00A9}') || paragraph.text.contains("&copy") {
             ClassType::Bad
@@ -93,15 +93,15 @@ mod tests {
         classify_paragraphs(&mut paragraphs, &empty_stoplist(), &config);
 
         // 20 chars, 0 links → density 0 ≤ 0.5, length=20 < 70 → short
-        assert_eq!(paragraphs[0].cf_class, ClassType::Short);
+        assert_eq!(paragraphs[0].initial_class, ClassType::Short);
         // 20 chars, 20 links → density 1.0 > 0.5 → bad
-        assert_eq!(paragraphs[1].cf_class, ClassType::Bad);
+        assert_eq!(paragraphs[1].initial_class, ClassType::Bad);
         // 80 chars, 40 links → density 0.5 = 0.5, NOT > → length≥70, stopword=0 < 0.30 → bad
-        assert_eq!(paragraphs[2].cf_class, ClassType::Bad);
+        assert_eq!(paragraphs[2].initial_class, ClassType::Bad);
         // 80 chars, 39 links → density 0.4875 ≤ 0.5 → length≥70, stopword=0 → bad
-        assert_eq!(paragraphs[3].cf_class, ClassType::Bad);
+        assert_eq!(paragraphs[3].initial_class, ClassType::Bad);
         // 80 chars, 41 links → density 0.5125 > 0.5 → bad
-        assert_eq!(paragraphs[4].cf_class, ClassType::Bad);
+        assert_eq!(paragraphs[4].initial_class, ClassType::Bad);
     }
 
     #[test]
@@ -118,8 +118,8 @@ mod tests {
         };
         classify_paragraphs(&mut paragraphs, &empty_stoplist(), &config);
 
-        assert_eq!(paragraphs[0].cf_class, ClassType::Short);
-        assert_eq!(paragraphs[1].cf_class, ClassType::Bad);
+        assert_eq!(paragraphs[0].initial_class, ClassType::Short);
+        assert_eq!(paragraphs[1].initial_class, ClassType::Bad);
     }
 
     #[test]
@@ -139,9 +139,9 @@ mod tests {
         classify_paragraphs(&mut paragraphs, &stoplist(&["0"]), &config);
 
         // text "0 1 2 3 4 5 6 7 8 9" len=19 ≤ 20 → neargood
-        assert_eq!(paragraphs[0].cf_class, ClassType::NearGood);
+        assert_eq!(paragraphs[0].initial_class, ClassType::NearGood);
         // repeated text len=39 > 20 → good
-        assert_eq!(paragraphs[1].cf_class, ClassType::Good);
+        assert_eq!(paragraphs[1].initial_class, ClassType::Good);
     }
 
     #[test]
@@ -162,18 +162,18 @@ mod tests {
         classify_paragraphs(&mut paragraphs, &stoplist(&["0", "1"]), &config);
 
         // "0 0 0 0 1 2 3 4 5 6 7 8 9" → 5/13 ≈ 0.38 ≥ 0.2 → neargood
-        assert_eq!(paragraphs[0].cf_class, ClassType::NearGood);
+        assert_eq!(paragraphs[0].initial_class, ClassType::NearGood);
         // "0 1 2 3 4 5 6 7 8 9" → 2/10 = 0.2 ≥ 0.2 → neargood
-        assert_eq!(paragraphs[1].cf_class, ClassType::NearGood);
+        assert_eq!(paragraphs[1].initial_class, ClassType::NearGood);
         // "1 2 3 4 5 6 7 8 9" → 1/9 ≈ 0.11 < 0.2 → bad
-        assert_eq!(paragraphs[2].cf_class, ClassType::Bad);
+        assert_eq!(paragraphs[2].initial_class, ClassType::Bad);
     }
 
     #[test]
     fn test_copyright_symbol() {
         let mut ps = vec![make_paragraph("Copyright \u{00A9} 2024 Acme", 0)];
         classify_paragraphs(&mut ps, &empty_stoplist(), &Config::default());
-        assert_eq!(ps[0].cf_class, ClassType::Bad);
+        assert_eq!(ps[0].initial_class, ClassType::Bad);
     }
 
     #[test]
@@ -181,7 +181,7 @@ mod tests {
         // "&copy" literal string (un-decoded entity) in text → bad
         let mut ps = vec![make_paragraph("&copy; 2024 Acme Corp", 0)];
         classify_paragraphs(&mut ps, &empty_stoplist(), &Config::default());
-        assert_eq!(ps[0].cf_class, ClassType::Bad);
+        assert_eq!(ps[0].initial_class, ClassType::Bad);
     }
 
     #[test]
@@ -196,7 +196,7 @@ mod tests {
         classify_paragraphs(&mut ps, &empty_stoplist(), &Config::default());
         for p in &ps {
             if p.dom_path.contains("select") {
-                assert_eq!(p.cf_class, ClassType::Bad);
+                assert_eq!(p.initial_class, ClassType::Bad);
             }
         }
     }

@@ -9,19 +9,21 @@
 //! # Quick start
 //!
 //! ```rust
-//! use justext::{justext, get_stoplist, Config};
+//! use justext::{extract_text_lang, Config};
 //!
 //! let html = "<html><body><p>This is the main content.</p></body></html>";
-//! let stoplist = get_stoplist("English").unwrap();
-//! let config = Config::default();
-//! let paragraphs = justext(html, &stoplist, &config);
-//!
-//! for p in &paragraphs {
-//!     if !p.is_boilerplate() {
-//!         println!("{}", p.text);
-//!     }
-//! }
+//! let text = extract_text_lang(html, "English", &Config::default()).unwrap();
+//! println!("{text}");
 //! ```
+//!
+//! # Related crates
+//!
+//! - [`trafilatura`](https://crates.io/crates/trafilatura) — full-featured web
+//!   content extraction with metadata, comments, and fallback strategies.
+//! - [`libreadability`](https://crates.io/crates/libreadability) — Mozilla Readability
+//!   port for extracting a clean article DOM subtree.
+//! - [`html2markdown`](https://crates.io/crates/html2markdown) — converts HTML to
+//!   Markdown via an intermediate AST.
 
 mod classify;
 mod error;
@@ -114,4 +116,40 @@ pub fn extract_text(html: &str, stoplist: &HashSet<String>, config: &Config) -> 
         .map(|p| p.text)
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+/// Classify paragraphs using a language name instead of a pre-loaded stoplist.
+///
+/// Equivalent to `get_stoplist(language)` followed by `justext()`.
+///
+/// # Example
+///
+/// ```rust
+/// let paragraphs = justext::justext_lang("<html><body><p>Hello world</p></body></html>", "English", &justext::Config::default()).unwrap();
+/// ```
+pub fn justext_lang(
+    html: &str,
+    language: &str,
+    config: &Config,
+) -> Result<Vec<Paragraph>, JustextError> {
+    let stoplist = get_stoplist(language)?;
+    Ok(justext(html, &stoplist, config))
+}
+
+/// Extract only the good paragraph text using a language name.
+///
+/// Equivalent to `get_stoplist(language)` followed by `extract_text()`.
+///
+/// # Example
+///
+/// ```rust
+/// let text = justext::extract_text_lang("<html><body><p>Hello world</p></body></html>", "English", &justext::Config::default()).unwrap();
+/// ```
+pub fn extract_text_lang(
+    html: &str,
+    language: &str,
+    config: &Config,
+) -> Result<String, JustextError> {
+    let stoplist = get_stoplist(language)?;
+    Ok(extract_text(html, &stoplist, config))
 }

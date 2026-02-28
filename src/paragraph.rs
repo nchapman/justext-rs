@@ -27,8 +27,8 @@ pub struct Paragraph {
     pub tags_count: usize,
     /// Final classification (set by revision stage).
     pub class_type: ClassType,
-    /// Context-free classification (set by classification stage).
-    pub cf_class: ClassType,
+    /// Context-free classification before neighbor-based revision.
+    pub initial_class: ClassType,
     /// Whether this paragraph is a heading.
     pub heading: bool,
 }
@@ -51,7 +51,7 @@ impl Paragraph {
             chars_count_in_links,
             tags_count,
             class_type: ClassType::Short,
-            cf_class: ClassType::Short,
+            initial_class: ClassType::Short,
             heading: false,
         }
     }

@@ -6,12 +6,12 @@ use crate::paragraph::{ClassType, Paragraph};
 
 /// Context-sensitive revision of paragraph classifications.
 ///
-/// Assumes `classify_paragraphs` has already set `cf_class` on all paragraphs.
+/// Assumes `classify_paragraphs` has already set `initial_class` on all paragraphs.
 /// Runs four stages in order; each stage mutates `class_type`.
 pub fn revise_paragraph_classification(paragraphs: &mut [Paragraph], max_heading_distance: usize) {
-    // Stage 1: copy cf_class → class_type, then promote short headings near good blocks.
+    // Stage 1: copy initial_class → class_type, then promote short headings near good blocks.
     for i in 0..paragraphs.len() {
-        paragraphs[i].class_type = paragraphs[i].cf_class;
+        paragraphs[i].class_type = paragraphs[i].initial_class;
 
         if !(paragraphs[i].heading && paragraphs[i].class_type == ClassType::Short) {
             continue;
@@ -75,7 +75,7 @@ pub fn revise_paragraph_classification(paragraphs: &mut [Paragraph], max_heading
     for i in 0..paragraphs.len() {
         if !(paragraphs[i].heading
             && paragraphs[i].class_type == ClassType::Bad
-            && paragraphs[i].cf_class != ClassType::Bad)
+            && paragraphs[i].initial_class != ClassType::Bad)
         {
             continue;
         }
@@ -132,7 +132,7 @@ mod tests {
     use super::*;
     use crate::paragraph::ClassType::*;
 
-    /// Build a minimal Paragraph with the given cf_class (and class_type = cf_class).
+    /// Build a minimal Paragraph with the given initial_class (and class_type = initial_class).
     fn para(cf: ClassType) -> Paragraph {
         let mut p = Paragraph::new(
             "body.p".to_string(),
@@ -141,7 +141,7 @@ mod tests {
             0,
             0,
         );
-        p.cf_class = cf;
+        p.initial_class = cf;
         p.class_type = cf;
         p
     }
@@ -154,7 +154,7 @@ mod tests {
             0,
             0,
         );
-        p.cf_class = cf;
+        p.initial_class = cf;
         p.class_type = cf;
         p.heading = true;
         p
@@ -168,7 +168,7 @@ mod tests {
             0,
             0,
         );
-        p.cf_class = cf;
+        p.initial_class = cf;
         p.class_type = cf;
         p
     }
@@ -285,7 +285,7 @@ mod tests {
 
     #[test]
     fn test_stage4_heading_bad_cf_not_bad_near_good() {
-        // Heading with cf_class=Short, was revised to Bad, near Good → promoted to Good
+        // Heading with initial_class=Short, was revised to Bad, near Good → promoted to Good
         let mut ps = vec![
             para_heading(Short),
             para_text(Bad, &"x".repeat(10)),
@@ -312,7 +312,7 @@ mod tests {
 
     #[test]
     fn test_stage4_heading_cf_bad_not_promoted() {
-        // Heading with cf_class=Bad stays Bad even near Good (cf_class=Bad is excluded)
+        // Heading with initial_class=Bad stays Bad even near Good (initial_class=Bad is excluded)
         let mut ps = vec![para_heading(Bad), para(Good)];
         revise_paragraph_classification(&mut ps, 200);
         assert_eq!(ps[0].class_type, Bad);

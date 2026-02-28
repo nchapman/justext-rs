@@ -20,26 +20,41 @@ justext = "0.1"
 ```
 
 ```rust
-use justext::{extract_text, get_stoplist, Config};
+use justext::{extract_text_lang, Config};
 
-let html = include_str!("article.html");
-let stoplist = get_stoplist("English").unwrap();
+let html = r#"<html><body>
+  <nav>Menu | About | Contact</nav>
+  <article>
+    <p>This is the main article body with enough text to be classified
+    as content by the stopword density algorithm.</p>
+  </article>
+  <footer>Copyright 2024</footer>
+</body></html>"#;
 
-let text = extract_text(html, &stoplist, &Config::default());
+let text = extract_text_lang(html, "English", &Config::default()).unwrap();
 println!("{text}");
 ```
 
 For access to the full paragraph classification:
 
 ```rust
-use justext::{justext, get_stoplist, Config};
+use justext::{justext_lang, Config};
 
-let stoplist = get_stoplist("English").unwrap();
-let paragraphs = justext(html, &stoplist, &Config::default());
+let paragraphs = justext_lang(html, "English", &Config::default()).unwrap();
 
 for p in &paragraphs {
     println!("{:?}  {}", p.class_type, p.text);
 }
+```
+
+The `_lang` variants look up the stoplist internally. If you already have a stoplist,
+use `justext()` / `extract_text()` directly:
+
+```rust
+use justext::{extract_text, get_stoplist, Config};
+
+let stoplist = get_stoplist("English").unwrap();
+let text = extract_text(html, &stoplist, &Config::default());
 ```
 
 ## How it works
@@ -60,7 +75,7 @@ Paragraphs classified `Good` are content; everything else is boilerplate.
 |-------|-------------|
 | `text` | Normalized text content |
 | `class_type` | Final classification (`Good`, `Bad`, `NearGood`, `Short`) |
-| `cf_class` | Context-free classification (before revision) |
+| `initial_class` | Context-free classification (before revision) |
 | `dom_path` | Dot-separated DOM path, e.g. `"body.div.p"` |
 | `xpath` | XPath with ordinals, e.g. `"/html[1]/body[1]/div[2]/p[1]"` |
 | `words_count` | Whitespace-split word count |
