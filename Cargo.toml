@@ -3,10 +3,10 @@ name = "justext"
 version = "0.1.0"
 edition = "2021"
 description = "Rust port of JusText — paragraph-level boilerplate removal for HTML"
-license = "Apache-2.0"
+license = "BSD-2-Clause"
 rust-version = "1.80"
 readme = "README.md"
-repository = "https://github.com/lessisbetter/justext-rs"
+repository = "https://github.com/nchapman/justext-rs"
 documentation = "https://docs.rs/justext"
 keywords = ["justext", "boilerplate", "html", "extraction", "text"]
 categories = ["parser-implementations", "text-processing", "web-programming"]
@@ -16,7 +16,7 @@ name = "justext"
 
 [dependencies]
 # HTML parsing + CSS selectors (html5ever-based, spec-compliant)
-scraper = "0.22"
+scraper = "0.25"
 ego-tree = "0.10"
 
 # Error types
@@ -31,7 +31,7 @@ tracing = ["dep:tracing"]
 
 [dev-dependencies]
 pretty_assertions = "1"
-criterion = { version = "0.5", features = ["html_reports"] }
+criterion = { version = "0.8", features = ["html_reports"] }
 
 [[bench]]
 name = "extraction"

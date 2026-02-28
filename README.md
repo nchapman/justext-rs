@@ -1,6 +1,7 @@
 # justext
 
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/justext.svg)](https://crates.io/crates/justext)
+[![License: BSD-2-Clause](https://img.shields.io/badge/license-BSD--2--Clause-blue.svg)](LICENSE)
 [![Rust: 1.80+](https://img.shields.io/badge/rust-1.80%2B-orange.svg)](https://www.rust-lang.org)
 
 Paragraph-level boilerplate removal for HTML.
@@ -138,7 +139,7 @@ justext = { version = "0.1", features = ["tracing"] }
 
 ## Comparison to readability
 
-| | justext | readability |
+| | justext | libreadability |
 |---|---|---|
 | Unit of extraction | Paragraphs | DOM subtree |
 | Output | `Vec<Paragraph>` (plain text) | Cleaned HTML |
@@ -150,4 +151,4 @@ first and falls back to JusText — this crate enables the same pattern in Rust.
 
 ## License
 
-Apache-2.0
+BSD-2-Clause
