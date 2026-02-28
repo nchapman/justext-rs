@@ -1,5 +1,6 @@
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use justext::{get_all_stoplists, get_stoplist, justext, Config};
+use std::hint::black_box;
 
 // ---------------------------------------------------------------------------
 // HTML fixtures
@@ -107,9 +108,7 @@ fn bench_stoplists(c: &mut Criterion) {
     });
 
     // Cached: LazyLock, pointer-sized return after first call.
-    group.bench_function("get_all_stoplists_cached", |b| {
-        b.iter(|| get_all_stoplists())
-    });
+    group.bench_function("get_all_stoplists_cached", |b| b.iter(get_all_stoplists));
 
     // Full pipeline: English stoplist vs merged all-languages stoplist.
     let english = get_stoplist("English").unwrap();
