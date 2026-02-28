@@ -80,7 +80,7 @@ final class JustextTests: XCTestCase {
         XCTAssertTrue(h.domPath.contains("h2"))
         XCTAssertTrue(h.xpath.contains("h2"))
         XCTAssertTrue(h.heading)
-        XCTAssertEqual(h.wordsCount, 2)
+        XCTAssertEqual(h.wordCount, 2)
     }
 
     // MARK: - default config & languages

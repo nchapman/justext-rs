@@ -74,7 +74,7 @@ class JustextTest {
             assertTrue(h.domPath.contains("h2"))
             assertTrue(h.xpath.contains("h2"))
             assertTrue(h.heading)
-            assertEquals(2.toULong(), h.wordsCount)
+            assertEquals(2L, h.wordCount)
         }
     }
 
@@ -82,12 +82,12 @@ class JustextTest {
 
         @Test fun `default config`() {
             val config = defaultConfig()
-            assertEquals(70.toULong(), config.lengthLow)
-            assertEquals(200.toULong(), config.lengthHigh)
+            assertEquals(70L, config.lengthLow)
+            assertEquals(200L, config.lengthHigh)
             assertEquals(0.30, config.stopwordsLow, 0.001)
             assertEquals(0.32, config.stopwordsHigh, 0.001)
             assertEquals(0.2, config.maxLinkDensity, 0.001)
-            assertEquals(200.toULong(), config.maxHeadingDistance)
+            assertEquals(200L, config.maxHeadingDistance)
             assertFalse(config.noHeadings)
         }
 

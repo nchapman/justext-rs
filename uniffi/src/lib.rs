@@ -36,11 +36,11 @@ pub struct Paragraph {
     /// Normalized text content.
     pub text: String,
     /// Word count.
-    pub words_count: u64,
+    pub word_count: i64,
     /// Character count inside `<a>` tags.
-    pub chars_count_in_links: u64,
+    pub link_char_count: i64,
     /// Inline tag count.
-    pub tags_count: u64,
+    pub tag_count: i64,
     /// Final classification.
     pub class_type: ClassType,
     /// Classification before neighbor-based revision.
@@ -52,12 +52,12 @@ pub struct Paragraph {
 /// Configuration for the JusText algorithm.
 #[derive(uniffi::Record)]
 pub struct Config {
-    pub length_low: u64,
-    pub length_high: u64,
+    pub length_low: i64,
+    pub length_high: i64,
     pub stopwords_low: f64,
     pub stopwords_high: f64,
     pub max_link_density: f64,
-    pub max_heading_distance: u64,
+    pub max_heading_distance: i64,
     pub no_headings: bool,
 }
 
@@ -66,12 +66,12 @@ pub struct Config {
 pub fn default_config() -> Config {
     let d = justext::Config::default();
     Config {
-        length_low: d.length_low as u64,
-        length_high: d.length_high as u64,
+        length_low: d.length_low as i64,
+        length_high: d.length_high as i64,
         stopwords_low: d.stopwords_low,
         stopwords_high: d.stopwords_high,
         max_link_density: d.max_link_density,
-        max_heading_distance: d.max_heading_distance as u64,
+        max_heading_distance: d.max_heading_distance as i64,
         no_headings: d.no_headings,
     }
 }
@@ -127,14 +127,13 @@ pub fn classify_paragraphs_with(
 // --- Internal conversion helpers ---
 
 fn to_core_config(c: &Config) -> justext::Config {
-    let cap = usize::MAX as u64;
     justext::Config::default()
-        .with_length_low(c.length_low.min(cap) as usize)
-        .with_length_high(c.length_high.min(cap) as usize)
+        .with_length_low(c.length_low.max(0) as usize)
+        .with_length_high(c.length_high.max(0) as usize)
         .with_stopwords_low(c.stopwords_low)
         .with_stopwords_high(c.stopwords_high)
         .with_max_link_density(c.max_link_density)
-        .with_max_heading_distance(c.max_heading_distance.min(cap) as usize)
+        .with_max_heading_distance(c.max_heading_distance.max(0) as usize)
         .with_no_headings(c.no_headings)
 }
 
@@ -152,9 +151,9 @@ fn to_ffi_paragraph(p: justext::Paragraph) -> Paragraph {
         dom_path: p.dom_path,
         xpath: p.xpath,
         text: p.text,
-        words_count: p.words_count as u64,
-        chars_count_in_links: p.chars_count_in_links as u64,
-        tags_count: p.tags_count as u64,
+        word_count: p.words_count as i64,
+        link_char_count: p.chars_count_in_links as i64,
+        tag_count: p.tags_count as i64,
         class_type: convert_class_type(p.class_type),
         initial_class: convert_class_type(p.initial_class),
         heading: p.heading,

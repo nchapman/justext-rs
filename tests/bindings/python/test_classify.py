@@ -50,9 +50,9 @@ def test_paragraph_fields():
     assert "h2" in h.dom_path
     assert "h2" in h.xpath
     assert h.heading is True
-    assert h.words_count == 2
-    assert isinstance(h.chars_count_in_links, int)
-    assert isinstance(h.tags_count, int)
+    assert h.word_count == 2
+    assert isinstance(h.link_char_count, int)
+    assert isinstance(h.tag_count, int)
 
 
 def test_classify_with_custom_config():
