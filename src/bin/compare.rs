@@ -59,7 +59,11 @@ fn main() {
         let raw = match fs::read(path) {
             Ok(b) => b,
             Err(e) => {
-                eprintln!("{{\"file\": {}, \"error\": {}}}", json_str(&filename), json_str(&e.to_string()));
+                eprintln!(
+                    "{{\"file\": {}, \"error\": {}}}",
+                    json_str(&filename),
+                    json_str(&e.to_string())
+                );
                 errors += 1;
                 continue;
             }
@@ -79,7 +83,11 @@ fn main() {
             .collect::<Vec<_>>()
             .join("\n");
 
-        println!("{{\"file\": {}, \"text\": {}}}", json_str(&filename), json_str(&text));
+        println!(
+            "{{\"file\": {}, \"text\": {}}}",
+            json_str(&filename),
+            json_str(&text)
+        );
         ok += 1;
     }
 

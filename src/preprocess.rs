@@ -225,7 +225,10 @@ mod tests {
         assert!(!has_tag(&doc, "form"), "form tag should be removed");
         assert!(has_tag(&doc, "p"), "child <p> should survive");
         let content = text_content(&doc);
-        assert!(content.contains("Article content"), "text inside form should be preserved");
+        assert!(
+            content.contains("Article content"),
+            "text inside form should be preserved"
+        );
     }
 
     #[test]
@@ -277,7 +280,13 @@ mod tests {
         let html = r#"<html><body><a href="/?a=1&amp;b=2">link</a></body></html>"#;
         let doc = preprocess(html);
         let sel = scraper::Selector::parse("a").unwrap();
-        let href = doc.select(&sel).next().unwrap().value().attr("href").unwrap();
+        let href = doc
+            .select(&sel)
+            .next()
+            .unwrap()
+            .value()
+            .attr("href")
+            .unwrap();
         assert_eq!(href, "/?a=1&b=2", "decoded & must survive the double parse");
     }
 
@@ -297,5 +306,4 @@ mod tests {
             "<year> must not become a DOM element"
         );
     }
-
 }

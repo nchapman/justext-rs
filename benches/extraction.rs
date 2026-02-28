@@ -128,7 +128,13 @@ fn bench_stoplists(c: &mut Criterion) {
         .with_stopwords_high(0.0);
     let empty: std::collections::HashSet<String> = std::collections::HashSet::new();
     group.bench_function("pipeline_language_independent", |b| {
-        b.iter(|| justext(black_box(&medium), black_box(&empty), black_box(&empty_config)))
+        b.iter(|| {
+            justext(
+                black_box(&medium),
+                black_box(&empty),
+                black_box(&empty_config),
+            )
+        })
     });
 
     group.finish();

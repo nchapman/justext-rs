@@ -168,7 +168,9 @@ impl ParagraphAccumulator {
     fn contains_text(&self) -> bool {
         // Require at least one text node with non-whitespace content.
         // A lone " " from a <br> tag must not trigger a paragraph flush.
-        self.text_nodes.iter().any(|t| t.chars().any(|c| !c.is_whitespace()))
+        self.text_nodes
+            .iter()
+            .any(|t| t.chars().any(|c| !c.is_whitespace()))
     }
 
     fn build(self) -> Paragraph {
