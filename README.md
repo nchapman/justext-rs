@@ -151,15 +151,15 @@ first and falls back to JusText — this crate enables the same pattern in Rust.
 
 ## Benchmarks
 
-Full pipeline (HTML parse + classify + revise) with English stoplist:
+Rust vs Python ([jusText](https://github.com/miso-belica/jusText)) — full pipeline (parse + classify + revise):
 
-| Input | Size | Time |
-|-------|-----:|-----:|
-| small (2 paragraphs) | 733 B | 21 µs |
-| medium (20 paragraphs) | 5 KB | 98 µs |
-| large (100 paragraphs) | 34 KB | 604 µs |
+| Input | Rust | Python | Speedup |
+|-------|-----:|-------:|--------:|
+| small (2 paragraphs, 733 B) | 21 µs | 202 µs | **10x** |
+| medium (20 paragraphs, 5 KB) | 98 µs | 1.4 ms | **14x** |
+| large (100 paragraphs, 34 KB) | 604 µs | 11.1 ms | **18x** |
 
-### Comparison with Python jusText
+### Output comparison
 
 On a 925-file dataset (the [trafilatura comparison corpus](https://github.com/adbar/trafilatura)),
 Rust and Python produce identical extracted text on **99.4%** of files (919/925).
