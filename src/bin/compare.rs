@@ -45,7 +45,7 @@ fn main() {
     let mut entries: Vec<_> = fs::read_dir(html_dir)
         .expect("cannot read html-dir")
         .filter_map(|e| e.ok())
-        .filter(|e| e.path().extension().map_or(false, |x| x == "html"))
+        .filter(|e| e.path().extension().is_some_and(|x| x == "html"))
         .map(|e| e.path())
         .collect();
     entries.sort();
