@@ -10,6 +10,7 @@ repository = "https://github.com/nchapman/justext-rs"
 documentation = "https://docs.rs/justext"
 keywords = ["justext", "boilerplate", "html", "extraction", "text"]
 categories = ["parser-implementations", "text-processing", "web-programming"]
+exclude = ["CLAUDE.md", "PLAN.md"]
 
 [lib]
 name = "justext"
