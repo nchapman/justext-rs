@@ -16,7 +16,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-justext = "0.1"
+justext = "0.2"
 ```
 
 ```rust
@@ -149,7 +149,7 @@ let config = Config::default()
 | `tracing` | Enable debug/trace logging (zero-cost when disabled) |
 
 ```toml
-justext = { version = "0.1", features = ["tracing"] }
+justext = { version = "0.2", features = ["tracing"] }
 ```
 
 ## Comparison to readability
