@@ -78,9 +78,9 @@ Paragraphs classified `Good` are content; everything else is boilerplate.
 | `initial_class` | Context-free classification (before revision) |
 | `dom_path` | Dot-separated DOM path, e.g. `"body.div.p"` |
 | `xpath` | XPath with ordinals, e.g. `"/html[1]/body[1]/div[2]/p[1]"` |
-| `words_count` | Whitespace-split word count |
-| `chars_count_in_links` | Character count inside `<a>` tags |
-| `tags_count` | Count of inline tags within the paragraph |
+| `word_count` | Whitespace-split word count |
+| `link_char_count` | Character count inside `<a>` tags |
+| `tag_count` | Count of inline tags within the paragraph |
 | `heading` | Whether the paragraph is a heading (`h0`–`h9` in dom_path) |
 
 ## Stoplists
@@ -163,6 +163,41 @@ justext = { version = "0.2", features = ["tracing"] }
 
 The two are complementary. [trafilatura](https://github.com/adbar/trafilatura) uses readability
 first and falls back to JusText — this crate enables the same pattern in Rust.
+
+## Language bindings
+
+Python, Swift, and Kotlin bindings are available via [UniFFI](https://mozilla.github.io/uniffi-rs/).
+
+```sh
+make test-bindings   # run all binding test suites
+make test-python     # Python only (pytest)
+make test-swift      # Swift only (XCTest)
+make test-kotlin     # Kotlin only (JUnit 5)
+```
+
+### Python
+
+```python
+from justext_uniffi import extract_text, classify_paragraphs, default_config
+
+text = extract_text("<html><body><p>Article content...</p></body></html>", "English")
+```
+
+### Swift
+
+```swift
+import Justext
+
+let text = try extractText(html: html, language: "English")
+```
+
+### Kotlin
+
+```kotlin
+import uniffi.justext_uniffi.*
+
+val text = extractText(html, "English")
+```
 
 ## Benchmarks
 
