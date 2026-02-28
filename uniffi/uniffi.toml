@@ -1,0 +1,10 @@
+[bindings.python]
+cdylib_name = "justext_uniffi"
+
+[bindings.kotlin]
+cdylib_name = "justext_uniffi"
+package_name = "justext"
+
+[bindings.swift]
+cdylib_name = "justext_uniffi"
+module_name = "Justext"

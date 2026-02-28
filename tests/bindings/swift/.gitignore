@@ -1,0 +1,4 @@
+.build/
+generated/
+Sources/justext_uniffiFFI/justext_uniffiFFI.h
+Sources/Justext/justext_uniffi.swift

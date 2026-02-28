@@ -1,1 +1,5 @@
 /target
+.venv*/
+tests/bindings/swift/.build/
+tests/bindings/kotlin/.gradle/
+tests/bindings/kotlin/build/
